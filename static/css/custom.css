@@ -1,0 +1,148 @@
+/* Custom CSS to enhance Bootstrap styles */
+
+/* Product card */
+.product-card {
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 100%;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.product-img-container {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-img {
+    max-height: 180px;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+/* Featured products section */
+.featured-section {
+    padding: 50px 0;
+}
+
+/* Categories section */
+.category-card {
+    transition: transform 0.3s;
+    min-height: 100px;
+}
+
+.category-card:hover {
+    transform: scale(1.05);
+}
+
+/* Cart badge */
+.cart-badge {
+    position: relative;
+    top: -10px;
+    right: 5px;
+}
+
+/* Order status badges */
+.status-pending {
+    background-color: var(--bs-warning);
+}
+
+.status-processing {
+    background-color: var(--bs-info);
+}
+
+.status-shipped {
+    background-color: var(--bs-primary);
+}
+
+.status-delivered {
+    background-color: var(--bs-success);
+}
+
+.status-cancelled {
+    background-color: var(--bs-danger);
+}
+
+/* Admin dashboard cards */
+.admin-card {
+    transition: transform 0.3s;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Filter sidebar */
+.filter-sidebar {
+    position: sticky;
+    top: 20px;
+}
+
+/* Product images in admin panel */
+.admin-product-img {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+/* Payment methods */
+.payment-method-card {
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.payment-method-card:hover {
+    border-color: var(--bs-primary);
+}
+
+.payment-method-card.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Product quantity control */
+.quantity-control {
+    display: flex;
+    align-items: center;
+}
+
+.quantity-control .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.quantity-control input {
+    width: 50px;
+    text-align: center;
+}
+
+/* Address cards */
+.address-card {
+    transition: all 0.3s;
+}
+
+.address-card:hover {
+    border-color: var(--bs-primary);
+}
+
+.address-card.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+}
+
+/* Order confirmation page */
+.order-success-icon {
+    font-size: 5rem;
+    color: var(--bs-success);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .filter-sidebar {
+        position: relative;
+    }
+}

@@ -1,0 +1,127 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Manage Orders | ShopEasy Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Orders</h1>
+    <div class="btn-group">
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-secondary {{ 'active' if not current_status }}">All</a>
+        <a href="{{ url_for('admin_orders', status='Pending') }}" class="btn btn-outline-warning {{ 'active' if current_status == 'Pending' }}">Pending</a>
+        <a href="{{ url_for('admin_orders', status='Processing') }}" class="btn btn-outline-info {{ 'active' if current_status == 'Processing' }}">Processing</a>
+        <a href="{{ url_for('admin_orders', status='Shipped') }}" class="btn btn-outline-primary {{ 'active' if current_status == 'Shipped' }}">Shipped</a>
+        <a href="{{ url_for('admin_orders', status='Delivered') }}" class="btn btn-outline-success {{ 'active' if current_status == 'Delivered' }}">Delivered</a>
+        <a href="{{ url_for('admin_orders', status='Cancelled') }}" class="btn btn-outline-danger {{ 'active' if current_status == 'Cancelled' }}">Cancelled</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">
+            {% if current_status %}
+                {{ current_status }} Orders
+            {% else %}
+                All Orders
+            {% endif %}
+        </h5>
+        <div class="input-group" style="width: 300px;">
+            <input type="text" class="form-control" placeholder="Search orders..." id="orderSearch">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Payment Method</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.user.name }}</td>
+                        <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+                        <td>₹{{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>
+                            {% if order.payment_method == 'cod' %}
+                                Cash on Delivery
+                            {% elif order.payment_method == 'card' %}
+                                Credit/Debit Card
+                            {% elif order.payment_method == 'upi' %}
+                                UPI
+                            {% elif order.payment_method == 'netbanking' %}
+                                Net Banking
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if order.status == 'Delivered' 
+                                             else 'primary' if order.status == 'Shipped' 
+                                             else 'info' if order.status == 'Processing' 
+                                             else 'warning' if order.status == 'Pending'
+                                             else 'danger' }}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-eye me-1"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+            <h4>No Orders Found</h4>
+            <p class="text-muted">
+                {% if current_status %}
+                    No {{ current_status.lower() }} orders available.
+                {% else %}
+                    No orders have been placed yet.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple order search functionality
+        const searchInput = document.getElementById('orderSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchValue = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('tbody tr');
+                
+                tableRows.forEach(row => {
+                    const orderNumber = row.cells[0].textContent.toLowerCase();
+                    const customerName = row.cells[1].textContent.toLowerCase();
+                    
+                    if (orderNumber.includes(searchValue) || customerName.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

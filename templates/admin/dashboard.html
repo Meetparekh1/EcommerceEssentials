@@ -1,0 +1,178 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin Dashboard | ShopEasy{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group me-2">
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-download me-1"></i>Export
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-secondary">
+                <i class="fas fa-print me-1"></i>Print
+            </button>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">
+            <i class="fas fa-calendar me-1"></i>This week
+        </button>
+    </div>
+</div>
+
+<!-- Stats Cards -->
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card admin-card bg-primary text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase">Total Products</h6>
+                        <h2 class="mb-0">{{ total_products }}</h2>
+                    </div>
+                    <i class="fas fa-box fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('admin_products') }}" class="text-white text-decoration-none small">View Details</a>
+                <i class="fas fa-angle-right text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card admin-card bg-success text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase">Total Orders</h6>
+                        <h2 class="mb-0">{{ total_orders }}</h2>
+                    </div>
+                    <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('admin_orders') }}" class="text-white text-decoration-none small">View Details</a>
+                <i class="fas fa-angle-right text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card admin-card bg-info text-white h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase">Total Users</h6>
+                        <h2 class="mb-0">{{ total_users }}</h2>
+                    </div>
+                    <i class="fas fa-users fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('admin_users') }}" class="text-white text-decoration-none small">View Details</a>
+                <i class="fas fa-angle-right text-white"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3 mb-4">
+        <div class="card admin-card bg-warning text-dark h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase">Total Revenue</h6>
+                        <h2 class="mb-0">₹{{ "%.2f"|format(total_revenue) }}</h2>
+                    </div>
+                    <i class="fas fa-rupee-sign fa-3x opacity-50"></i>
+                </div>
+            </div>
+            <div class="card-footer d-flex align-items-center justify-content-between">
+                <a href="{{ url_for('admin_orders') }}" class="text-dark text-decoration-none small">View Details</a>
+                <i class="fas fa-angle-right text-dark"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Orders -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Recent Orders</h5>
+    </div>
+    <div class="card-body">
+        {% if recent_orders %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in recent_orders %}
+                    <tr>
+                        <td>{{ order.order_number }}</td>
+                        <td>{{ order.user.name }}</td>
+                        <td>₹{{ "%.2f"|format(order.total_amount) }}</td>
+                        <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if order.status == 'Delivered' 
+                                             else 'primary' if order.status == 'Shipped' 
+                                             else 'info' if order.status == 'Processing' 
+                                             else 'warning' if order.status == 'Pending'
+                                             else 'danger' }}">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-primary">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-center py-3 text-muted">No orders found</p>
+        {% endif %}
+    </div>
+    <div class="card-footer text-end">
+        <a href="{{ url_for('admin_orders') }}" class="btn btn-sm btn-outline-primary">View All Orders</a>
+    </div>
+</div>
+
+<!-- Quick Stats -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Order Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <i class="fas fa-chart-pie fa-5x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Top Products</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-center align-items-center h-100">
+                    <i class="fas fa-chart-bar fa-5x text-primary opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

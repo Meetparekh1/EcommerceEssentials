@@ -1,0 +1,135 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}User Details | ShopEasy Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">User Details</h1>
+    <a href="{{ url_for('admin_users') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Users
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <!-- User Information -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">User Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-circle fa-5x text-primary mb-3"></i>
+                    <h4>{{ user.name }}</h4>
+                    <p class="text-muted">{{ user.email }}</p>
+                </div>
+                
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>User ID</span>
+                        <span class="badge bg-primary rounded-pill">{{ user.id }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Registered On</span>
+                        <span>{{ user.created_at.strftime('%d %b %Y') }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>Total Orders</span>
+                        <span class="badge bg-primary rounded-pill">{{ orders|length }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- User Addresses -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Saved Addresses</h5>
+            </div>
+            <div class="card-body">
+                {% if addresses %}
+                    <div class="accordion" id="addressAccordion">
+                        {% for address in addresses %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ address.id }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ address.id }}" aria-expanded="false" aria-controls="collapse{{ address.id }}">
+                                    Address #{{ loop.index }}
+                                    {% if address.is_default %}
+                                    <span class="badge bg-primary ms-2">Default</span>
+                                    {% endif %}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ address.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ address.id }}" data-bs-parent="#addressAccordion">
+                                <div class="accordion-body">
+                                    <address>
+                                        {{ address.address_line1 }}<br>
+                                        {% if address.address_line2 %}{{ address.address_line2 }}<br>{% endif %}
+                                        {{ address.city }}, {{ address.state }} - {{ address.pincode }}<br>
+                                        Phone: {{ address.phone }}
+                                    </address>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                <p class="text-center text-muted">No addresses saved</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <!-- User Orders -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Order History</h5>
+            </div>
+            <div class="card-body">
+                {% if orders %}
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Order #</th>
+                                <th>Date</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.created_at.strftime('%d %b %Y') }}</td>
+                                <td>₹{{ "%.2f"|format(order.total_amount) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ 'success' if order.status == 'Delivered' 
+                                                     else 'primary' if order.status == 'Shipped' 
+                                                     else 'info' if order.status == 'Processing' 
+                                                     else 'warning' if order.status == 'Pending'
+                                                     else 'danger' }}">
+                                        {{ order.status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('admin_order_detail', order_id=order.id) }}" class="btn btn-sm btn-primary">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-bag fa-4x text-muted mb-3"></i>
+                    <h4>No Orders Yet</h4>
+                    <p class="text-muted">This user hasn't placed any orders yet.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

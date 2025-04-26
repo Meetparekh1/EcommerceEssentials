@@ -1,0 +1,110 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Manage Products | ShopEasy Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Products</h1>
+    <a href="{{ url_for('admin_add_product') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add New Product
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">All Products</h5>
+        <div class="input-group" style="width: 300px;">
+            <input type="text" class="form-control" placeholder="Search products..." id="productSearch">
+            <button class="btn btn-outline-secondary" type="button">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Image</th>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Featured</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.id }}</td>
+                        <td>
+                            {% if product.image_url %}
+                            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="admin-product-img">
+                            {% else %}
+                            <i class="fas fa-box fa-2x text-muted"></i>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.category.name }}</td>
+                        <td>₹{{ "%.2f"|format(product.price) }}</td>
+                        <td>
+                            <span class="badge bg-{{ 'success' if product.stock > 10 else 'warning' if product.stock > 0 else 'danger' }}">
+                                {{ product.stock }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if product.featured %}
+                            <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                            <i class="far fa-star text-muted"></i>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a href="{{ url_for('admin_edit_product', product_id=product.id) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{{ url_for('admin_delete_product', product_id=product.id) }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this product?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                <a href="{{ url_for('product', id=product.id) }}" class="btn btn-sm btn-outline-info" target="_blank">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Simple product search functionality
+        const searchInput = document.getElementById('productSearch');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function() {
+                const searchValue = this.value.toLowerCase();
+                const tableRows = document.querySelectorAll('tbody tr');
+                
+                tableRows.forEach(row => {
+                    const productName = row.cells[2].textContent.toLowerCase();
+                    const categoryName = row.cells[3].textContent.toLowerCase();
+                    
+                    if (productName.includes(searchValue) || categoryName.includes(searchValue)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

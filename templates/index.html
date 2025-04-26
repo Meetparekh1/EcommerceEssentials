@@ -1,0 +1,130 @@
+{% extends 'layout.html' %}
+
+{% block title %}ShopEasy - Online Shopping for Everyone{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="bg-dark text-white text-center p-5 mb-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h1 class="display-4">Shop with Ease</h1>
+                <p class="lead">Find amazing products at affordable prices</p>
+                <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                    <a href="#categories" class="btn btn-primary btn-lg px-4 gap-3">Shop Now</a>
+                    <a href="#featured" class="btn btn-outline-light btn-lg px-4">Featured Products</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Products -->
+<section id="featured" class="featured-section">
+    <div class="container">
+        <h2 class="text-center mb-4">Featured Products</h2>
+        <div class="row">
+            {% for product in featured_products %}
+            <div class="col-md-3 mb-4">
+                <div class="card h-100 product-card">
+                    <div class="product-img-container p-3">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img">
+                        {% else %}
+                        <i class="fas fa-box fa-5x text-muted"></i>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-muted">{{ product.description|truncate(50) }}</p>
+                        <p class="card-text fw-bold">₹{{ "%.2f"|format(product.price) }}</p>
+                    </div>
+                    <div class="card-footer bg-transparent">
+                        <a href="{{ url_for('product', id=product.id) }}" class="btn btn-primary w-100">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Categories -->
+<section id="categories" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Shop by Category</h2>
+        <div class="row">
+            {% for category in categories %}
+            <div class="col-md-4 mb-4">
+                <a href="{{ url_for('category', id=category.id) }}" class="text-decoration-none">
+                    <div class="card category-card text-center h-100">
+                        <div class="card-body">
+                            <i class="fa-solid 
+                            {% if category.name == 'Electronics' %}fa-laptop
+                            {% elif category.name == 'Clothing' %}fa-tshirt
+                            {% elif category.name == 'Books' %}fa-book
+                            {% elif category.name == 'Home & Kitchen' %}fa-home
+                            {% elif category.name == 'Sports' %}fa-futbol
+                            {% elif category.name == 'Beauty' %}fa-spa
+                            {% else %}fa-shopping-bag
+                            {% endif %} fa-3x mb-3"></i>
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text text-muted">{{ category.description }}</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Why Shop with Us?</h2>
+        <div class="row text-center">
+            <div class="col-md-3 mb-4">
+                <i class="fas fa-truck fa-3x mb-3 text-primary"></i>
+                <h5>Fast Delivery</h5>
+                <p class="text-muted">Get your products delivered within 2-3 business days</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <i class="fas fa-undo-alt fa-3x mb-3 text-primary"></i>
+                <h5>Easy Returns</h5>
+                <p class="text-muted">30-day easy return policy for all products</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <i class="fas fa-shield-alt fa-3x mb-3 text-primary"></i>
+                <h5>Secure Payments</h5>
+                <p class="text-muted">Multiple secure payment options available</p>
+            </div>
+            <div class="col-md-3 mb-4">
+                <i class="fas fa-headset fa-3x mb-3 text-primary"></i>
+                <h5>24/7 Support</h5>
+                <p class="text-muted">Customer support available round the clock</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter -->
+<section class="py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h3>Subscribe to our Newsletter</h3>
+                <p class="text-muted mb-4">Get the latest updates, offers and more</p>
+                <form class="row g-3 justify-content-center">
+                    <div class="col-auto">
+                        <input type="email" class="form-control" placeholder="Enter your email">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

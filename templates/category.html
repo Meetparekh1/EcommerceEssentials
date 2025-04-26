@@ -1,0 +1,148 @@
+{% extends 'layout.html' %}
+
+{% block title %}{{ category.name }} | ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ category.name }}</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4">{{ category.name }}</h2>
+    <p class="text-muted">{{ category.description }}</p>
+
+    <div class="row">
+        <!-- Filter Sidebar -->
+        <div class="col-md-3 mb-4">
+            <div class="card filter-sidebar">
+                <div class="card-header">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('category', id=category.id) }}" method="GET">
+                        <!-- Price Range Filter -->
+                        <div class="mb-4">
+                            <h6>Price Range</h6>
+                            <div class="mb-2">
+                                <label for="price-range-min">Min: ₹<span id="price-min-value">{{ min_price }}</span></label>
+                                <input type="range" class="form-range" id="price-range-min" name="min_price" min="0" max="50000" step="100" value="{{ min_price }}">
+                            </div>
+                            <div>
+                                <label for="price-range-max">Max: ₹<span id="price-max-value">{{ max_price }}</span></label>
+                                <input type="range" class="form-range" id="price-range-max" name="max_price" min="0" max="100000" step="100" value="{{ max_price }}">
+                            </div>
+                        </div>
+
+                        <!-- Sort By -->
+                        <div class="mb-3">
+                            <h6>Sort By</h6>
+                            <select class="form-select" name="sort">
+                                <option value="price_asc" {% if sort_by == 'price_asc' %}selected{% endif %}>Price: Low to High</option>
+                                <option value="price_desc" {% if sort_by == 'price_desc' %}selected{% endif %}>Price: High to Low</option>
+                                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest First</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="col-md-9">
+            <div class="row">
+                {% if products.items %}
+                    {% for product in products.items %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100 product-card">
+                            <div class="product-img-container p-3">
+                                {% if product.image_url %}
+                                <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-img">
+                                {% else %}
+                                <i class="fas fa-box fa-3x text-muted"></i>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text text-muted">{{ product.description|truncate(50) }}</p>
+                                <p class="card-text fw-bold">₹{{ "%.2f"|format(product.price) }}</p>
+                                <p class="card-text">
+                                    <span class="badge bg-{{ 'success' if product.stock > 10 else 'warning' if product.stock > 0 else 'danger' }}">
+                                        {{ 'In Stock' if product.stock > 10 else product.stock|string + ' Left' if product.stock > 0 else 'Out of Stock' }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <a href="{{ url_for('product', id=product.id) }}" class="btn btn-primary w-100">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5">
+                        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                        <h4>No products found</h4>
+                        <p class="text-muted">Try adjusting your filter criteria</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Pagination -->
+            {% if products.pages > 1 %}
+            <nav aria-label="Product pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('category', id=category.id, page=products.prev_num, min_price=min_price, max_price=max_price, sort=sort_by) }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&laquo;</span>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                        {% if page_num %}
+                            {% if products.page == page_num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('category', id=category.id, page=page_num, min_price=min_price, max_price=max_price, sort=sort_by) }}">{{ page_num }}</a>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('category', id=category.id, page=products.next_num, min_price=min_price, max_price=max_price, sort=sort_by) }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link" aria-hidden="true">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

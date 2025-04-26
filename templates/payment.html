@@ -1,0 +1,117 @@
+{% extends 'layout.html' %}
+
+{% block title %}Payment | ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Payment Details</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading">Order Summary</h5>
+                        <p class="mb-0">Order #{{ order.order_number }}</p>
+                        <p class="mb-0">Total Amount: ₹{{ "%.2f"|format(order.total_amount) }}</p>
+                        <p class="mb-0">Payment Method: 
+                            {% if order.payment_method == 'cod' %}
+                                Cash on Delivery
+                            {% elif order.payment_method == 'card' %}
+                                Credit/Debit Card
+                            {% elif order.payment_method == 'upi' %}
+                                UPI
+                            {% elif order.payment_method == 'netbanking' %}
+                                Net Banking
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if order.payment_method == 'cod' %}
+                        <!-- Cash on Delivery -->
+                        <div class="text-center py-3">
+                            <i class="fas fa-money-bill-wave fa-5x text-success mb-3"></i>
+                            <h4>Cash on Delivery</h4>
+                            <p class="text-muted">You will pay ₹{{ "%.2f"|format(order.total_amount) }} when your order is delivered.</p>
+                            <form action="{{ url_for('process_payment', order_id=order.id) }}" method="post">
+                                <button type="submit" class="btn btn-success btn-lg mt-3">Confirm Order</button>
+                            </form>
+                        </div>
+                    {% elif order.payment_method == 'card' %}
+                        <!-- Credit/Debit Card Payment -->
+                        <form action="{{ url_for('process_payment', order_id=order.id) }}" method="post">
+                            <div class="mb-3">
+                                <label for="card_number" class="form-label">Card Number</label>
+                                <input type="text" class="form-control" id="card_number" placeholder="1234 5678 9012 3456" required>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="expiry" class="form-label">Expiry Date</label>
+                                    <input type="text" class="form-control" id="expiry" placeholder="MM/YY" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cvv" placeholder="123" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="card_name" class="form-label">Name on Card</label>
+                                <input type="text" class="form-control" id="card_name" placeholder="John Doe" required>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Pay ₹{{ "%.2f"|format(order.total_amount) }}</button>
+                            </div>
+                        </form>
+                    {% elif order.payment_method == 'upi' %}
+                        <!-- UPI Payment -->
+                        <div class="text-center py-3">
+                            <i class="fas fa-mobile-alt fa-5x text-primary mb-3"></i>
+                            <h4>UPI Payment</h4>
+                            <p class="text-muted">Please enter your UPI ID to complete the payment.</p>
+                            <form action="{{ url_for('process_payment', order_id=order.id) }}" method="post">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" placeholder="yourname@upi" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">Pay ₹{{ "%.2f"|format(order.total_amount) }}</button>
+                            </form>
+                        </div>
+                    {% elif order.payment_method == 'netbanking' %}
+                        <!-- Net Banking -->
+                        <div class="text-center py-3">
+                            <i class="fas fa-university fa-5x text-primary mb-3"></i>
+                            <h4>Net Banking</h4>
+                            <p class="text-muted">Choose your bank to continue to secure payment page.</p>
+                            <form action="{{ url_for('process_payment', order_id=order.id) }}" method="post">
+                                <div class="mb-3">
+                                    <select class="form-select" required>
+                                        <option value="" selected disabled>Select Bank</option>
+                                        <option value="sbi">State Bank of India</option>
+                                        <option value="hdfc">HDFC Bank</option>
+                                        <option value="icici">ICICI Bank</option>
+                                        <option value="axis">Axis Bank</option>
+                                        <option value="kotak">Kotak Mahindra Bank</option>
+                                        <option value="pnb">Punjab National Bank</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-lg">Proceed to Pay</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <div class="text-muted mb-3">
+                        <i class="fas fa-lock me-2"></i>Your payment information is secure
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <i class="fab fa-cc-visa fa-2x me-2"></i>
+                        <i class="fab fa-cc-mastercard fa-2x me-2"></i>
+                        <i class="fab fa-cc-amex fa-2x me-2"></i>
+                        <i class="fab fa-cc-paypal fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

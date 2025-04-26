@@ -1,0 +1,187 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Order #{{ order.order_number }} | ShopEasy Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Order #{{ order.order_number }}</h1>
+    <a href="{{ url_for('admin_orders') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Orders
+    </a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <!-- Order Items -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Order Items</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Quantity</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3" style="width: 50px; height: 50px;">
+                                            {% if item.product.image_url %}
+                                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-fluid" style="max-height: 50px;">
+                                            {% else %}
+                                            <i class="fas fa-box fa-2x text-muted"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                                            <small class="text-muted">{{ item.product.category.name }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>₹{{ "%.2f"|format(item.price) }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                                <td>₹{{ "%.2f"|format(order.total_amount) }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                                <td>₹{{ "%.2f"|format(40.00 if order.total_amount < 500 else 0.00) }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Tax (18%):</strong></td>
+                                <td>₹{{ "%.2f"|format(order.total_amount * 0.18) }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                <td><strong>₹{{ "%.2f"|format(order.total_amount) }}</strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Customer Information -->
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Customer Information</h5>
+                <a href="{{ url_for('admin_user_detail', user_id=order.user.id) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-user me-1"></i>View Customer
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Customer Details</h6>
+                        <p class="mb-1"><strong>Name:</strong> {{ order.user.name }}</p>
+                        <p class="mb-1"><strong>Email:</strong> {{ order.user.email }}</p>
+                        <p class="mb-0"><strong>Account Created:</strong> {{ order.user.created_at.strftime('%d %b %Y') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Shipping Address</h6>
+                        <address>
+                            {{ order.address.address_line1 }}<br>
+                            {% if order.address.address_line2 %}{{ order.address.address_line2 }}<br>{% endif %}
+                            {{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}<br>
+                            Phone: {{ order.address.phone }}
+                        </address>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <!-- Order Summary -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Order Summary</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-2"><strong>Order Number:</strong> {{ order.order_number }}</p>
+                <p class="mb-2"><strong>Order Date:</strong> {{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                <p class="mb-2"><strong>Payment Method:</strong> 
+                    {% if order.payment_method == 'cod' %}
+                        Cash on Delivery
+                    {% elif order.payment_method == 'card' %}
+                        Credit/Debit Card
+                    {% elif order.payment_method == 'upi' %}
+                        UPI
+                    {% elif order.payment_method == 'netbanking' %}
+                        Net Banking
+                    {% endif %}
+                </p>
+                <p class="mb-2">
+                    <strong>Status:</strong> 
+                    <span class="badge bg-{{ 'success' if order.status == 'Delivered' 
+                                     else 'primary' if order.status == 'Shipped' 
+                                     else 'info' if order.status == 'Processing' 
+                                     else 'warning' if order.status == 'Pending'
+                                     else 'danger' }}">
+                        {{ order.status }}
+                    </span>
+                </p>
+                <p class="mb-0"><strong>Total Amount:</strong> ₹{{ "%.2f"|format(order.total_amount) }}</p>
+            </div>
+        </div>
+        
+        <!-- Update Order Status -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Update Order Status</h5>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('admin_update_order_status', order_id=order.id) }}" method="POST">
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Current Status</label>
+                        <select name="status" id="status" class="form-select">
+                            <option value="Pending" {% if order.status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Processing" {% if order.status == 'Processing' %}selected{% endif %}>Processing</option>
+                            <option value="Shipped" {% if order.status == 'Shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="Delivered" {% if order.status == 'Delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="Cancelled" {% if order.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Update Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>Print Order
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-file-pdf me-2"></i>Download Invoice
+                    </button>
+                    <button class="btn btn-outline-info">
+                        <i class="fas fa-envelope me-2"></i>Send to Customer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

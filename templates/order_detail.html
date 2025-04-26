@@ -1,0 +1,129 @@
+{% extends 'layout.html' %}
+
+{% block title %}Order Details | ShopEasy{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('orders') }}">My Orders</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Order #{{ order.order_number }}</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Order #{{ order.order_number }}</h5>
+            <span class="badge bg-{{ 'success' if order.status == 'Delivered' 
+                                else 'primary' if order.status == 'Shipped' 
+                                else 'info' if order.status == 'Processing' 
+                                else 'warning' if order.status == 'Pending'
+                                else 'danger' }}">
+                {{ order.status }}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h6>Order Information</h6>
+                    <p class="mb-1"><strong>Order Date:</strong> {{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+                    <p class="mb-1"><strong>Payment Method:</strong> 
+                        {% if order.payment_method == 'cod' %}
+                            Cash on Delivery
+                        {% elif order.payment_method == 'card' %}
+                            Credit/Debit Card
+                        {% elif order.payment_method == 'upi' %}
+                            UPI
+                        {% elif order.payment_method == 'netbanking' %}
+                            Net Banking
+                        {% endif %}
+                    </p>
+                    <p class="mb-0"><strong>Total Amount:</strong> ₹{{ "%.2f"|format(order.total_amount) }}</p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Shipping Address</h6>
+                    <address>
+                        {{ order.address.address_line1 }}<br>
+                        {% if order.address.address_line2 %}{{ order.address.address_line2 }}<br>{% endif %}
+                        {{ order.address.city }}, {{ order.address.state }} - {{ order.address.pincode }}<br>
+                        Phone: {{ order.address.phone }}
+                    </address>
+                </div>
+            </div>
+            
+            <h6>Order Items</h6>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3" style="width: 50px; height: 50px;">
+                                        {% if item.product.image_url %}
+                                        <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="img-fluid" style="max-height: 50px;">
+                                        {% else %}
+                                        <i class="fas fa-box fa-2x text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ item.product.name }}</h6>
+                                        <small class="text-muted">{{ item.product.category.name }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>₹{{ "%.2f"|format(item.price) }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
+                            <td>₹{{ "%.2f"|format(order.total_amount) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Shipping:</strong></td>
+                            <td>₹{{ "%.2f"|format(40.00 if order.total_amount < 500 else 0.00) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Tax (18%):</strong></td>
+                            <td>₹{{ "%.2f"|format(order.total_amount * 0.18) }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                            <td><strong>₹{{ "%.2f"|format(order.total_amount) }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="{{ url_for('orders') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Orders
+                </a>
+                {% if order.status == 'Delivered' %}
+                <button class="btn btn-primary" disabled>
+                    <i class="fas fa-check-circle me-2"></i>Delivered
+                </button>
+                {% else %}
+                <div class="text-end">
+                    <p class="mb-0 text-muted"><small>Estimated delivery: 3-5 business days</small></p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
