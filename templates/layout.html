@@ -23,10 +23,18 @@
             
             <!-- Delivery Location -->
             <div class="d-none d-lg-block me-2">
-                <div class="text-white small">
-                    <i class="fas fa-map-marker-alt"></i> Deliver to
-                    <div class="fw-bold">India</div>
-                </div>
+                <a href="{{ url_for('addresses') }}" class="text-decoration-none">
+                    <div class="text-white small">
+                        <i class="fas fa-map-marker-alt"></i> Deliver to
+                        <div class="fw-bold">
+                            {% if session.get('user_id') and session.get('default_address') %}
+                                {{ session.get('default_address') }}
+                            {% else %}
+                                India
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
             </div>
             
             <!-- Search Bar -->

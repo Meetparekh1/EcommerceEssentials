@@ -112,7 +112,8 @@
                         <div class="mb-3">
                             <label for="quantity" class="form-label small">Quantity</label>
                             <select name="quantity" id="quantity" class="form-select form-select-sm">
-                                {% for i in range(1, min(product.stock, 10) + 1) %}
+                                {% set max_qty = product.stock if product.stock < 10 else 10 %}
+                                {% for i in range(1, max_qty + 1) %}
                                 <option value="{{ i }}">{{ i }}</option>
                                 {% endfor %}
                             </select>
