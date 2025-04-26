@@ -22,6 +22,14 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
+# Custom template filters
+@app.template_filter('slice')
+def slice_filter(iterable, count):
+    """Return first 'count' items of the iterable as a list."""
+    if iterable is None:
+        return []
+    return list(iterable)[:count]
+
 # Configure SQLite database
 app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///ecommerce.db")
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {

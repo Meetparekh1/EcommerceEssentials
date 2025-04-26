@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en" data-bs-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}ShopEasy - Online Shopping{% endblock %}</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0-beta3/css/all.min.css">
     <!-- Custom CSS -->
@@ -13,71 +13,202 @@
     {% block styles %}{% endblock %}
 </head>
 <body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('index') }}">
-                <i class="fas fa-shopping-bag me-2"></i>ShopEasy
+    <!-- Top Navbar - Amazon Style -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-amazon py-1">
+        <div class="container-fluid px-2 px-md-4">
+            <!-- Logo -->
+            <a class="navbar-brand py-0" href="{{ url_for('index') }}">
+                <span class="fs-4 fw-bold text-white">Shop<span style="color: var(--amazon-orange);">Easy</span></span>
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Home</a>
-                    </li>
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Categories
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+            
+            <!-- Delivery Location -->
+            <div class="d-none d-lg-block me-2">
+                <div class="text-white small">
+                    <i class="fas fa-map-marker-alt"></i> Deliver to
+                    <div class="fw-bold">India</div>
+                </div>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="navbar-search mx-2 d-none d-md-block">
+                <form class="d-flex search-box">
+                    <div class="input-group">
+                        <button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            All
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">All Categories</a></li>
                             {% for category in categories|default([]) %}
                             <li><a class="dropdown-item" href="{{ url_for('category', id=category.id) }}">{{ category.name }}</a></li>
                             {% endfor %}
                         </ul>
-                    </li>
+                        <input type="search" class="form-control" placeholder="Search products...">
+                        <button class="btn search-button" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Items -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <!-- Admin Panel Access -->
                     {% if session.get('is_admin') %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin Panel</a>
-                    </li>
-                    {% endif %}
-                </ul>
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link position-relative" href="{{ url_for('cart') }}">
-                            <i class="fas fa-shopping-cart"></i> Cart
-                            {% if cart_items|default([])|length > 0 %}
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger cart-badge">
-                                {{ cart_items|length }}
-                            </span>
-                            {% endif %}
+                        <a class="nav-link text-white" href="{{ url_for('admin_dashboard') }}" style="background-color: var(--amazon-dark-orange); border-radius: 4px; padding: 8px 12px; margin-right: 8px;">
+                            <div class="small">Admin</div>
+                            <div class="fw-bold">Panel</div>
                         </a>
                     </li>
+                    {% endif %}
+                    
+                    <!-- Account & Lists -->
                     {% if session.get('user_id') %}
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle"></i> {{ session.get('user_name', 'Account') }}
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="small">Hello, {{ session.get('user_name', 'User') }}</div>
+                            <div class="fw-bold">Account & Lists</div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('orders') }}">My Orders</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('addresses') }}">My Addresses</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}">Sign Out</a></li>
                         </ul>
                     </li>
                     {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">Register</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="small">Hello, sign in</div>
+                            <div class="fw-bold">Account & Lists</div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('login') }}">Sign In</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('register') }}">New customer? Start here</a></li>
+                        </ul>
                     </li>
                     {% endif %}
+                    
+                    <!-- Returns & Orders -->
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('orders') }}">
+                            <div class="small">Returns</div>
+                            <div class="fw-bold">& Orders</div>
+                        </a>
+                    </li>
+                    
+                    <!-- Cart -->
+                    <li class="nav-item">
+                        <a class="nav-link text-white position-relative" href="{{ url_for('cart') }}">
+                            <i class="fas fa-shopping-cart fa-2x"></i>
+                            <span class="fw-bold ms-1">Cart</span>
+                            {% if cart_items|default([])|length > 0 %}
+                            <span class="position-absolute top-0 start-75 translate-middle badge rounded-pill bg-warning text-dark">
+                                {{ cart_items|length }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
     </nav>
+    
+    <!-- Secondary Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: var(--amazon-light-blue); padding: 4px 0;">
+        <div class="container-fluid px-2 px-md-4">
+            <button class="navbar-toggler me-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#categoriesOffcanvas">
+                <i class="fas fa-bars me-1"></i> All
+            </button>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white" href="#" data-bs-toggle="dropdown">
+                            <i class="fas fa-bars me-1"></i> All
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% for category in categories|default([]) %}
+                            <li><a class="dropdown-item" href="{{ url_for('category', id=category.id) }}">{{ category.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% for category in categories|default([])|sort(attribute='name')|slice(5) %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('category', id=category.id) }}">{{ category.name }}</a>
+                    </li>
+                    {% endfor %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('index') }}">Today's Deals</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="{{ url_for('index') }}">Best Sellers</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Search Bar -->
+    <div class="d-md-none p-2 bg-light">
+        <form class="d-flex">
+            <div class="input-group">
+                <input type="search" class="form-control" placeholder="Search products...">
+                <button class="btn search-button" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Mobile Categories Offcanvas -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="categoriesOffcanvas">
+        <div class="offcanvas-header bg-dark text-white">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-user-circle me-2"></i>
+                {% if session.get('user_id') %}
+                Hello, {{ session.get('user_name', 'User') }}
+                {% else %}
+                Hello, Sign in
+                {% endif %}
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="list-group list-group-flush">
+                <a href="{{ url_for('index') }}" class="list-group-item list-group-item-action">Home</a>
+                
+                <div class="list-group-item fw-bold">Shop By Category</div>
+                {% for category in categories|default([]) %}
+                <a href="{{ url_for('category', id=category.id) }}" class="list-group-item list-group-item-action ps-4">{{ category.name }}</a>
+                {% endfor %}
+                
+                {% if session.get('is_admin') %}
+                <div class="list-group-item fw-bold">Admin</div>
+                <a href="{{ url_for('admin_dashboard') }}" class="list-group-item list-group-item-action ps-4">Dashboard</a>
+                <a href="{{ url_for('admin_products') }}" class="list-group-item list-group-item-action ps-4">Manage Products</a>
+                <a href="{{ url_for('admin_orders') }}" class="list-group-item list-group-item-action ps-4">Manage Orders</a>
+                <a href="{{ url_for('admin_users') }}" class="list-group-item list-group-item-action ps-4">Manage Users</a>
+                {% endif %}
+                
+                <div class="list-group-item fw-bold">Your Account</div>
+                {% if session.get('user_id') %}
+                <a href="{{ url_for('orders') }}" class="list-group-item list-group-item-action ps-4">Your Orders</a>
+                <a href="{{ url_for('addresses') }}" class="list-group-item list-group-item-action ps-4">Your Addresses</a>
+                <a href="{{ url_for('logout') }}" class="list-group-item list-group-item-action ps-4">Sign Out</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="list-group-item list-group-item-action ps-4">Sign In</a>
+                <a href="{{ url_for('register') }}" class="list-group-item list-group-item-action ps-4">Create Account</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 
     <!-- Flash Messages -->
     <div class="container mt-3">
