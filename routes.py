@@ -107,6 +107,11 @@ def login():
             session['user_name'] = user.name
             session['is_admin'] = user.is_admin
             
+            # Get default address if exists
+            default_address = Address.query.filter_by(user_id=user.id, is_default=True).first()
+            if default_address:
+                session['default_address'] = f"{default_address.city}, {default_address.state} {default_address.pincode}"
+            
             next_page = request.args.get('next')
             flash('Login successful!', 'success')
             
@@ -152,6 +157,7 @@ def logout():
     session.pop('user_id', None)
     session.pop('user_name', None)
     session.pop('is_admin', None)
+    session.pop('default_address', None)
     flash('You have been logged out', 'success')
     return redirect(url_for('index'))
 
@@ -406,6 +412,10 @@ def add_address():
         db.session.add(address)
         db.session.commit()
         
+        # Update session with default address
+        if form.is_default.data:
+            session['default_address'] = f"{form.city.data}, {form.state.data} {form.pincode.data}"
+        
         flash('Address added successfully', 'success')
         
         # Redirect to next page if provided
@@ -448,6 +458,13 @@ def edit_address(address_id):
         
         db.session.commit()
         
+        # Update session with default address
+        if form.is_default.data:
+            session['default_address'] = f"{form.city.data}, {form.state.data} {form.pincode.data}"
+        elif address.is_default and 'default_address' in session:
+            # Clear default address from session if this was the default but isn't anymore
+            session.pop('default_address', None)
+        
         flash('Address updated successfully', 'success')
         return redirect(url_for('addresses'))
     
@@ -466,6 +483,10 @@ def delete_address(address_id):
     if Order.query.filter_by(address_id=address_id).first():
         flash('Cannot delete this address as it is used in orders', 'danger')
         return redirect(url_for('addresses'))
+    
+    # If this was the default address, remove it from session
+    if address.is_default and 'default_address' in session:
+        session.pop('default_address', None)
     
     db.session.delete(address)
     db.session.commit()

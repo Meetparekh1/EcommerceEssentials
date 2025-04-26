@@ -192,6 +192,15 @@
             <div class="list-group list-group-flush">
                 <a href="{{ url_for('index') }}" class="list-group-item list-group-item-action">Home</a>
                 
+                <a href="{% if session.get('user_id') %}{{ url_for('addresses') }}{% else %}{{ url_for('login') }}{% endif %}" class="list-group-item list-group-item-action">
+                    <i class="fas fa-map-marker-alt me-2"></i> Deliver to: 
+                    {% if session.get('user_id') and session.get('default_address') %}
+                        {{ session.get('default_address') }}
+                    {% else %}
+                        India
+                    {% endif %}
+                </a>
+                
                 <div class="list-group-item fw-bold">Shop By Category</div>
                 {% for category in categories|default([]) %}
                 <a href="{{ url_for('category', id=category.id) }}" class="list-group-item list-group-item-action ps-4">{{ category.name }}</a>
